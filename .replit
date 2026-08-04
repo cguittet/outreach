@@ -1,5 +1,6 @@
 entrypoint = "apps/web/server/index.ts"
 run = "pnpm dev"
+modules = ["nodejs-20", "web"]
 
 [deployment]
 build = "pnpm build:web"
@@ -8,3 +9,6 @@ deploymentTarget = "autoscale"
 
 [gitHubImport]
 requiredFiles = [".replit", "package.json", "pnpm-lock.yaml"]
+
+[nix]
+channel = "stable-25_05"
