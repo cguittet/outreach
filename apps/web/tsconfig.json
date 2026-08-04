@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": ["vite/client", "node", "vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["client/src/*"]
+    }
+  },
+  "include": ["client/src/**/*", "server/**/*", "vite.config.ts", "playwright.config.ts"]
+}

@@ -1,0 +1,12 @@
+node_modules/
+.pnpm-store/
+dist/
+.env
+.env.*
+!.env.example
+coverage/
+playwright-report/
+test-results/
+apps/extension/trucea-extension.zip
+*.log
+.DS_Store

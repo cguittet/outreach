@@ -1,0 +1,26 @@
+{
+  "name": "trucea-outreach-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @trucea/web dev",
+    "build": "pnpm -r --if-present build",
+    "build:web": "pnpm --filter @trucea/shared build && pnpm --filter @trucea/web build",
+    "start": "node apps/web/dist/server/migrate.js && node apps/web/dist/server/index.js",
+    "db:migrate": "pnpm --filter @trucea/web db:migrate",
+    "db:seed": "pnpm --filter @trucea/web db:seed",
+    "build:extension": "pnpm --filter @trucea/extension build",
+    "test": "pnpm -r --if-present test",
+    "test:e2e": "pnpm --filter @trucea/web test:e2e",
+    "check": "pnpm -r --if-present check && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "drizzle-orm": "^0.43.1",
+    "typescript": "^5.8.3"
+  }
+}

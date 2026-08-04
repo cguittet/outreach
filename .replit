@@ -1,0 +1,10 @@
+entrypoint = "apps/web/server/index.ts"
+run = "pnpm dev"
+
+[deployment]
+build = "pnpm build:web"
+run = "pnpm start"
+deploymentTarget = "autoscale"
+
+[gitHubImport]
+requiredFiles = [".replit", "package.json", "pnpm-lock.yaml"]
