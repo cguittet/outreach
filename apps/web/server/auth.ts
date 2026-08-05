@@ -32,8 +32,10 @@ async function upsertUser(identity: { sub: string; email: string; name?: string 
     email: identity.email.toLowerCase(),
     displayName: identity.name ?? identity.email,
   }).onConflictDoUpdate({
-    target: users.replitUserId,
-    set: { email: identity.email.toLowerCase(), displayName: identity.name ?? identity.email, updatedAt: new Date() },
+    // Use email as the conflict target so a real Replit login can overwrite a
+    // dev-seeded row that has the same email but a different replitUserId.
+    target: users.email,
+    set: { replitUserId: identity.sub, displayName: identity.name ?? identity.email, updatedAt: new Date() },
   }).returning();
   if (!user) throw new Error("Unable to create user");
   await db.insert(userSettings).values({ ownerId: user.id }).onConflictDoNothing();
