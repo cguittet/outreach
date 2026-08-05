@@ -13,9 +13,10 @@ async function main() {
   const isDev = process.env.NODE_ENV !== "production";
   app.use(cors({
     origin(origin, callback) {
+      // In dev, allow all origins (private single-user workspace — no production data at risk).
+      if (isDev) return callback(null, true);
+      // In production, restrict to the configured origins.
       if (!origin || origin === extensionOrigin || origin === process.env.APP_BASE_URL) return callback(null, true);
-      if (isDev && devOrigin && origin === devOrigin) return callback(null, true);
-      if (isDev && (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:"))) return callback(null, true);
       callback(new Error("Origin not allowed"));
     },
     credentials: true,
