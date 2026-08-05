@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/index.ts",
-    "build": "vite build && tsup server/index.ts server/migrate.ts server/seed.ts --format esm --platform node --target node20 --out-dir dist/server --clean false",
+    "build": "vite build && tsup --config tsup.server.config.ts",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",

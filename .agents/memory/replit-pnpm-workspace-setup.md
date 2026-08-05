@@ -49,3 +49,21 @@ The CORS middleware must allow three additional origins in development so the Re
 3. `http://127.0.0.1:PORT` — screenshot/health-check tool
 
 **Why:** The preview iframe sends the Replit dev domain as `Origin`; the screenshot tool sends `http://127.0.0.1:5000`. Strict origin checks return 500 (caught by the global error handler), rendering a blank page.
+
+---
+
+**Bundle workspace packages inline with tsup for production.**
+Workspace packages whose `exports` field points to `.ts` source files (common when `moduleResolution: "Bundler"` is used) crash at runtime in production with `ERR_UNKNOWN_FILE_EXTENSION`. tsup treats workspace deps as external by default, so the built server tries to import raw TypeScript at runtime.
+
+Fix: create a `tsup.config.ts` with `noExternal: ["@trucea/shared"]` so the shared package is bundled inline:
+
+```typescript
+// apps/web/tsup.server.config.ts
+export default defineConfig({
+  entry: ["server/index.ts", ...],
+  noExternal: ["@trucea/shared"],
+  ...
+});
+```
+
+**Why:** `moduleResolution: "Bundler"` is intentional (works great for bundlers) but means workspace packages are never compiled to standalone JS. tsup's `noExternal` forces those packages to be inlined at build time, avoiding any runtime `.ts` import.
