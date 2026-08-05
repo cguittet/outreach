@@ -14,7 +14,11 @@ export async function runMigrations(): Promise<void> {
         applied_at timestamptz NOT NULL DEFAULT now()
       )
     `);
-    const migrationsDir = path.resolve(process.cwd(), "database/migrations");
+    // Resolve migrations dir from the script's location, handling both dev (apps/web/server/)
+    // and production build (apps/web/dist/server/) execution contexts.
+    const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+    const isBuilt = scriptDir.includes("/dist/server");
+    const migrationsDir = path.resolve(scriptDir, isBuilt ? "../../../../database/migrations" : "../../../database/migrations");
     const files = (await fs.readdir(migrationsDir)).filter((file) => file.endsWith(".sql")).sort();
     for (const file of files) {
       const existing = await client.query("SELECT 1 FROM _trucea_migrations WHERE name = $1", [file]);

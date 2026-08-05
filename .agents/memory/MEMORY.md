@@ -1,0 +1,1 @@
+- [Replit pnpm workspace setup quirks](replit-pnpm-workspace-setup.md) — remove packageManager field, fix cwd-relative paths for dev vs built contexts, add dev CORS origins for preview pane

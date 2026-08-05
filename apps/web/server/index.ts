@@ -1,4 +1,5 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import express from "express";
 import cors from "cors";
 import { ZodError } from "zod";
@@ -8,9 +9,13 @@ import { registerRoutes } from "./routes";
 async function main() {
   const app = express();
   const extensionOrigin = process.env.ALLOWED_EXTENSION_ORIGIN;
+  const devOrigin = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null;
+  const isDev = process.env.NODE_ENV !== "production";
   app.use(cors({
     origin(origin, callback) {
       if (!origin || origin === extensionOrigin || origin === process.env.APP_BASE_URL) return callback(null, true);
+      if (isDev && devOrigin && origin === devOrigin) return callback(null, true);
+      if (isDev && (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:"))) return callback(null, true);
       callback(new Error("Origin not allowed"));
     },
     credentials: true,
@@ -19,13 +24,21 @@ async function main() {
   await setupAuth(app);
   registerRoutes(app);
 
+  // Resolve paths handling both dev (apps/web/server/) and production build (apps/web/dist/server/).
+  const serverDir = path.dirname(fileURLToPath(import.meta.url));
+  const isBuilt = serverDir.includes("/dist/server");
   if (process.env.NODE_ENV === "production") {
-    const publicDir = path.resolve(process.cwd(), "apps/web/dist/public");
+    // Built: dist/server → ../public = dist/public ✓
+    // Source (shouldn't run in prod): server → ../dist/public ✓
+    const publicDir = isBuilt
+      ? path.resolve(serverDir, "../public")
+      : path.resolve(serverDir, "../dist/public");
     app.use(express.static(publicDir, { maxAge: "1h", index: false }));
     app.get("*splat", (_req, res) => res.sendFile(path.join(publicDir, "index.html")));
   } else {
     const { createServer } = await import("vite");
-    const vite = await createServer({ configFile: path.resolve(process.cwd(), "apps/web/vite.config.ts"), server: { middlewareMode: true }, appType: "spa" });
+    // vite.config.ts is always one level up from server/ in source
+    const vite = await createServer({ configFile: path.resolve(serverDir, "../vite.config.ts"), server: { middlewareMode: true }, appType: "spa" });
     app.use(vite.middlewares);
   }
 
