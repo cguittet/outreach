@@ -5,6 +5,9 @@ import path from "node:path";
 export default defineConfig({
   root: path.resolve(import.meta.dirname, "client"),
   plugins: [react()],
+  server: {
+    allowedHosts: true,
+  },
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, "client/src") },
   },
