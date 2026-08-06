@@ -18,8 +18,8 @@
     "check": "pnpm -r --if-present check && pnpm test && pnpm build"
   },
   "devDependencies": {
-    "@types/node": "^22.15.3",
-    "drizzle-orm": "^0.43.1",
-    "typescript": "^5.8.3"
+    "@types/node": "^26.1.2",
+    "drizzle-orm": "^0.45.2",
+    "typescript": "^7.0.2"
   }
 }
