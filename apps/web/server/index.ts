@@ -9,7 +9,6 @@ import { registerRoutes } from "./routes";
 async function main() {
   const app = express();
   const extensionOrigin = process.env.ALLOWED_EXTENSION_ORIGIN;
-  const devOrigin = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null;
   const isDev = process.env.NODE_ENV !== "production";
   app.use(cors({
     origin(origin, callback) {
@@ -21,8 +20,11 @@ async function main() {
     },
     credentials: true,
   }));
-  app.use(express.json({ limit: "256kb" }));
+
+  // setupAuth mounts the Clerk proxy middleware (before body parsers) and clerkMiddleware
   await setupAuth(app);
+
+  app.use(express.json({ limit: "256kb" }));
   registerRoutes(app);
 
   // Resolve paths handling both dev (apps/web/server/) and production build (apps/web/dist/server/).

@@ -17,7 +17,7 @@ import {
   tokenCreateSchema,
   workflowInputSchema,
 } from "@trucea/shared";
-import { requireUser } from "./auth";
+import { requireAuth } from "./auth";
 import { getDb } from "./db";
 import {
   activities,
@@ -165,8 +165,8 @@ export function registerRoutes(app: Express): void {
   app.use("/api", rateLimit({ windowMs: 60_000, limit: 240, standardHeaders: true, legacyHeaders: false }));
   app.get("/api/health", (_req, res) => res.json({ ok: true, service: "trucea-outreach-tracker" }));
 
-  app.get("/api/summary", requireUser, asyncRoute(async (req, res) => {
-    const ownerId = req.user!.id;
+  app.get("/api/summary", requireAuth, asyncRoute(async (req, res) => {
+    const ownerId = req.dbUser.id;
     const db = getDb();
     const [tasks, workflow, settings, counts] = await Promise.all([
       listTasks(ownerId), ensureDefaultWorkflow(ownerId),
@@ -188,28 +188,28 @@ export function registerRoutes(app: Express): void {
     });
   }));
 
-  app.get("/api/prospects", requireUser, asyncRoute(async (req, res) => res.json((await listProspects(req.user!.id, req.query)).items)));
-  app.get("/api/prospects/export.csv", requireUser, asyncRoute(async (req, res) => {
-    const { items } = await listProspects(req.user!.id, req.query);
+  app.get("/api/prospects", requireAuth, asyncRoute(async (req, res) => res.json((await listProspects(req.dbUser.id, req.query)).items)));
+  app.get("/api/prospects/export.csv", requireAuth, asyncRoute(async (req, res) => {
+    const { items } = await listProspects(req.dbUser.id, req.query);
     const header = ["Name", "Job title", "Company", "Company size", "LinkedIn URL", "Connection", "Lifecycle stage", "Date added", "Last interaction", "Next action", "Due date"];
     const rows = items.map((item) => [item.name, item.jobTitle, item.company, item.companySize, item.linkedinUrl, item.connectionStatus, item.stage?.name, item.createdAt, item.lastInteractedAt, item.nextAction?.label, item.nextAction?.dueAt]);
     res.setHeader("content-type", "text/csv; charset=utf-8");
     res.setHeader("content-disposition", `attachment; filename="trucea-prospects-${new Date().toISOString().slice(0, 10)}.csv"`);
     res.send([header, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n"));
   }));
-  app.post("/api/prospects", requireUser, asyncRoute(async (req, res) => {
+  app.post("/api/prospects", requireAuth, asyncRoute(async (req, res) => {
     const input = prospectInputSchema.parse(req.body);
-    const prospect = await upsertProspect(req.user!.id, { ...input, linkedinUrl: normalizeLinkedInUrl(input.linkedinUrl) });
-    res.status(201).json(await getProspect(req.user!.id, prospect.id));
+    const prospect = await upsertProspect(req.dbUser.id, { ...input, linkedinUrl: normalizeLinkedInUrl(input.linkedinUrl) });
+    res.status(201).json(await getProspect(req.dbUser.id, prospect.id));
   }));
-  app.get("/api/prospects/:id", requireUser, asyncRoute(async (req, res) => {
-    const prospect = await getProspect(req.user!.id, String(req.params.id));
+  app.get("/api/prospects/:id", requireAuth, asyncRoute(async (req, res) => {
+    const prospect = await getProspect(req.dbUser.id, String(req.params.id));
     if (!prospect) return res.status(404).json({ message: "Prospect not found" });
     res.json(prospect);
   }));
-  app.patch("/api/prospects/:id", requireUser, asyncRoute(async (req, res) => {
+  app.patch("/api/prospects/:id", requireAuth, asyncRoute(async (req, res) => {
     const input = prospectPatchSchema.parse(req.body);
-    const ownerId = req.user!.id; const id = String(req.params.id); const db = getDb();
+    const ownerId = req.dbUser.id; const id = String(req.params.id); const db = getDb();
     const existing = await getProspect(ownerId, id);
     if (!existing) return res.status(404).json({ message: "Prospect not found" });
     const { mutualContacts: contacts, linkedinUrl, workflowStatus: legacyStatus, trackingStatus, ...changes } = input;
@@ -223,20 +223,20 @@ export function registerRoutes(app: Express): void {
     if (input.connectionStatus === "connected" && existing.connectionStatus !== "connected") await handleConnectionAccepted(ownerId, id);
     res.json(await getProspect(ownerId, id));
   }));
-  app.post("/api/prospects/:id/stage", requireUser, asyncRoute(async (req, res) => {
+  app.post("/api/prospects/:id/stage", requireAuth, asyncRoute(async (req, res) => {
     const input = stageTransitionSchema.parse(req.body);
-    res.json(await transitionProspect(req.user!.id, String(req.params.id), input.stageId, input.reason));
+    res.json(await transitionProspect(req.dbUser.id, String(req.params.id), input.stageId, input.reason));
   }));
-  app.post("/api/prospects/:id/activities", requireUser, asyncRoute(async (req, res) => res.status(201).json(await recordActivity(req.user!.id, String(req.params.id), activityInputSchema.parse(req.body)))));
+  app.post("/api/prospects/:id/activities", requireAuth, asyncRoute(async (req, res) => res.status(201).json(await recordActivity(req.dbUser.id, String(req.params.id), activityInputSchema.parse(req.body)))));
 
-  app.get("/api/tasks", requireUser, asyncRoute(async (req, res) => res.json(await listTasks(req.user!.id, req.query.due === "true"))));
-  app.post("/api/tasks/:id/complete", requireUser, asyncRoute(async (req, res) => { await completeAction(req.user!.id, String(req.params.id)); res.status(204).end(); }));
-  app.patch("/api/tasks/:id", requireUser, asyncRoute(async (req, res) => { const dueAt = new Date(String(req.body.dueAt ?? "")); if (Number.isNaN(dueAt.getTime())) return res.status(400).json({ message: "Choose a valid due date" }); res.json(await rescheduleAction(req.user!.id, String(req.params.id), dueAt)); }));
-  app.post("/api/tasks/:id/skip", requireUser, asyncRoute(async (req, res) => { await skipAction(req.user!.id, String(req.params.id)); res.status(204).end(); }));
+  app.get("/api/tasks", requireAuth, asyncRoute(async (req, res) => res.json(await listTasks(req.dbUser.id, req.query.due === "true"))));
+  app.post("/api/tasks/:id/complete", requireAuth, asyncRoute(async (req, res) => { await completeAction(req.dbUser.id, String(req.params.id)); res.status(204).end(); }));
+  app.patch("/api/tasks/:id", requireAuth, asyncRoute(async (req, res) => { const dueAt = new Date(String(req.body.dueAt ?? "")); if (Number.isNaN(dueAt.getTime())) return res.status(400).json({ message: "Choose a valid due date" }); res.json(await rescheduleAction(req.dbUser.id, String(req.params.id), dueAt)); }));
+  app.post("/api/tasks/:id/skip", requireAuth, asyncRoute(async (req, res) => { await skipAction(req.dbUser.id, String(req.params.id)); res.status(204).end(); }));
 
-  app.get("/api/workflow", requireUser, asyncRoute(async (req, res) => res.json(await ensureDefaultWorkflow(req.user!.id))));
-  app.put("/api/workflow", requireUser, asyncRoute(async (req, res) => {
-    const input = workflowInputSchema.parse(req.body); const ownerId = req.user!.id; const current = await ensureDefaultWorkflow(ownerId); const db = getDb();
+  app.get("/api/workflow", requireAuth, asyncRoute(async (req, res) => res.json(await ensureDefaultWorkflow(req.dbUser.id))));
+  app.put("/api/workflow", requireAuth, asyncRoute(async (req, res) => {
+    const input = workflowInputSchema.parse(req.body); const ownerId = req.dbUser.id; const current = await ensureDefaultWorkflow(ownerId); const db = getDb();
     const normalizedStages = input.stages.map((stage) => ({ ...stage, id: stage.id ?? crypto.randomUUID() }));
     const incomingIds = new Set(normalizedStages.map((stage) => stage.id));
     const removed = current.stages.filter((stage) => !incomingIds.has(stage.id));
@@ -272,18 +272,18 @@ export function registerRoutes(app: Express): void {
     res.json(await ensureDefaultWorkflow(ownerId));
   }));
 
-  app.get("/api/settings", requireUser, asyncRoute(async (req, res) => res.json((await getDb().select().from(userSettings).where(eq(userSettings.ownerId, req.user!.id)).limit(1))[0])));
-  app.patch("/api/settings", requireUser, asyncRoute(async (req, res) => {
+  app.get("/api/settings", requireAuth, asyncRoute(async (req, res) => res.json((await getDb().select().from(userSettings).where(eq(userSettings.ownerId, req.dbUser.id)).limit(1))[0])));
+  app.patch("/api/settings", requireAuth, asyncRoute(async (req, res) => {
     const input = settingsPatchSchema.parse(req.body);
     if (input.timezone && !Intl.supportedValuesOf("timeZone").includes(input.timezone)) return res.status(400).json({ message: "Invalid timezone" });
-    const [settings] = await getDb().update(userSettings).set({ ...input, updatedAt: new Date() }).where(eq(userSettings.ownerId, req.user!.id)).returning();
+    const [settings] = await getDb().update(userSettings).set({ ...input, updatedAt: new Date() }).where(eq(userSettings.ownerId, req.dbUser.id)).returning();
     res.json(settings);
   }));
-  app.get("/api/kpis", requireUser, asyncRoute(async (req, res) => res.json(await getKpis(req.user!.id, req.query))));
+  app.get("/api/kpis", requireAuth, asyncRoute(async (req, res) => res.json(await getKpis(req.dbUser.id, req.query))));
 
-  app.get("/api/extension-tokens", requireUser, asyncRoute(async (req, res) => res.json(await getDb().select({ id: extensionTokens.id, name: extensionTokens.name, lastUsedAt: extensionTokens.lastUsedAt, createdAt: extensionTokens.createdAt, revokedAt: extensionTokens.revokedAt }).from(extensionTokens).where(eq(extensionTokens.ownerId, req.user!.id)).orderBy(desc(extensionTokens.createdAt)))));
-  app.post("/api/extension-tokens", requireUser, asyncRoute(async (req, res) => { const { name } = tokenCreateSchema.parse(req.body); const token = `trucea_${crypto.randomBytes(32).toString("base64url")}`; const [record] = await getDb().insert(extensionTokens).values({ ownerId: req.user!.id, name, tokenHash: hashToken(token) }).returning(); res.status(201).json({ ...record, tokenHash: undefined, token }); }));
-  app.delete("/api/extension-tokens/:id", requireUser, asyncRoute(async (req, res) => { await getDb().update(extensionTokens).set({ revokedAt: new Date() }).where(and(eq(extensionTokens.id, String(req.params.id)), eq(extensionTokens.ownerId, req.user!.id))); res.status(204).end(); }));
+  app.get("/api/extension-tokens", requireAuth, asyncRoute(async (req, res) => res.json(await getDb().select({ id: extensionTokens.id, name: extensionTokens.name, lastUsedAt: extensionTokens.lastUsedAt, createdAt: extensionTokens.createdAt, revokedAt: extensionTokens.revokedAt }).from(extensionTokens).where(eq(extensionTokens.ownerId, req.dbUser.id)).orderBy(desc(extensionTokens.createdAt)))));
+  app.post("/api/extension-tokens", requireAuth, asyncRoute(async (req, res) => { const { name } = tokenCreateSchema.parse(req.body); const token = `trucea_${crypto.randomBytes(32).toString("base64url")}`; const [record] = await getDb().insert(extensionTokens).values({ ownerId: req.dbUser.id, name, tokenHash: hashToken(token) }).returning(); res.status(201).json({ ...record, tokenHash: undefined, token }); }));
+  app.delete("/api/extension-tokens/:id", requireAuth, asyncRoute(async (req, res) => { await getDb().update(extensionTokens).set({ revokedAt: new Date() }).where(and(eq(extensionTokens.id, String(req.params.id)), eq(extensionTokens.ownerId, req.dbUser.id))); res.status(204).end(); }));
 
   app.get("/api/extension/context", requireExtension, asyncRoute(async (req, res) => { const ownerId = res.locals.ownerId as string; let linkedinUrl: string; try { linkedinUrl = normalizeLinkedInUrl(String(req.query.linkedinUrl ?? "")); } catch { return res.status(400).json({ message: "Open a LinkedIn profile page first" }); } const row = (await getDb().select().from(prospects).where(and(eq(prospects.ownerId, ownerId), eq(prospects.linkedinUrl, linkedinUrl))).limit(1))[0]; res.json(row ? await getProspect(ownerId, row.id) : { linkedinUrl }); }));
   app.post("/api/extension/prospects", requireExtension, asyncRoute(async (req, res) => { const input = prospectInputSchema.parse(req.body); const ownerId = res.locals.ownerId as string; const prospect = await upsertProspect(ownerId, { ...input, linkedinUrl: normalizeLinkedInUrl(input.linkedinUrl) }); res.status(201).json(await getProspect(ownerId, prospect.id)); }));

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
+import { useClerk } from "@clerk/react";
 import { BarChart3, CalendarCheck, Chrome, LogOut, Route, Users, X } from "lucide-react";
 
 export function Button({ children, variant = "primary", className = "", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "ghost" | "danger" }) {
@@ -24,6 +25,7 @@ export function Modal({ title, children, onClose }: { title: string; children: R
 }
 
 export function Shell({ children }: { children: ReactNode }) {
+  const { signOut } = useClerk();
   const links = [
     { to: "/", label: "Today", icon: CalendarCheck },
     { to: "/prospects", label: "Prospects", icon: Users },
@@ -35,7 +37,7 @@ export function Shell({ children }: { children: ReactNode }) {
     <aside className="sidebar">
       <div className="brand"><div className="brand-mark">T</div><div><strong>Trucea</strong><span>Outreach</span></div></div>
       <nav>{links.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} end={to === "/"}><Icon size={19} /><span>{label}</span></NavLink>)}</nav>
-      <a className="logout" href="/api/logout"><LogOut size={18} />Sign out</a>
+      <button className="logout" onClick={() => signOut({ redirectUrl: "/" })}><LogOut size={18} />Sign out</button>
     </aside>
     <main className="main-content">{children}</main>
     <nav className="mobile-nav">{links.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} end={to === "/"}><Icon size={19} /><span>{label}</span></NavLink>)}</nav>

@@ -5,7 +5,7 @@ A private LinkedIn outreach tracker with a React/Express web dashboard and an op
 ## Stack
 
 - **Frontend**: React 19 + Vite (TypeScript, `apps/web/client/`)
-- **Backend**: Express 5 + Passport + Replit OIDC auth (`apps/web/server/`)
+- **Backend**: Express 5 + Clerk auth (`apps/web/server/`)
 - **Database**: PostgreSQL via Drizzle ORM (`database/schema/`, `database/migrations/`)
 - **Shared utilities**: `packages/shared/` (validation, URL, template, scheduling)
 - **Chrome extension**: `apps/extension/` (Manifest V3, optional)
@@ -24,8 +24,10 @@ The server listens on **port 5000** (set via `PORT` env var).
 
 | Key | Description |
 |-----|-------------|
-| `SESSION_SECRET` | At least 32 random characters for session signing |
-| `ALLOWED_EMAIL` | Replit account email that can log in |
+| `CLERK_SECRET_KEY` | Auto-provisioned by Replit Clerk integration |
+| `CLERK_PUBLISHABLE_KEY` | Auto-provisioned by Replit Clerk integration |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Auto-provisioned by Replit Clerk integration |
+| `ALLOWED_EMAIL` | Email address that can log in (optional allowlist) |
 | `APP_BASE_URL` | Preview URL in dev; published URL after deploying |
 | `DATABASE_URL` | Injected automatically by Replit |
 
@@ -40,7 +42,7 @@ Optional:
 
 ## Auth
 
-Uses Replit OIDC in production. Only `ALLOWED_EMAIL` can access the dashboard.
+Uses Replit-managed Clerk. Users sign in at `/sign-in`. If `ALLOWED_EMAIL` is set, only that email can access the dashboard. Clerk manages sessions; the local `users` table is the bridge for app-specific data (linked by email on first login via JIT provisioning).
 
 ## Replit-specific changes made during import
 
