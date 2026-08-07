@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { CalendarCheck, Chrome, LogOut, Route, Users, X } from "lucide-react";
+import { BarChart3, CalendarCheck, Chrome, LogOut, Route, Users, X } from "lucide-react";
 
 export function Button({ children, variant = "primary", className = "", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "ghost" | "danger" }) {
   return <button className={`button button-${variant} ${className}`} {...props}>{children}</button>;
@@ -28,6 +28,7 @@ export function Shell({ children }: { children: ReactNode }) {
     { to: "/", label: "Today", icon: CalendarCheck },
     { to: "/prospects", label: "Prospects", icon: Users },
     { to: "/workflow", label: "Workflow", icon: Route },
+    { to: "/kpis", label: "KPIs", icon: BarChart3 },
     { to: "/extension", label: "Extension", icon: Chrome },
   ];
   return <div className="app-shell">

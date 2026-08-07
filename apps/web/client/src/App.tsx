@@ -8,6 +8,7 @@ import Prospects from "./pages/Prospects";
 import ProspectDetail from "./pages/ProspectDetail";
 import Workflow from "./pages/Workflow";
 import ExtensionSettings from "./pages/ExtensionSettings";
+import Kpis from "./pages/Kpis";
 import type { User } from "./types";
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
     <Route path="/prospects/:id" element={<ProspectDetail />} />
     <Route path="/workflow" element={<Workflow />} />
     <Route path="/extension" element={<ExtensionSettings />} />
+    <Route path="/kpis" element={<Kpis />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes></Shell>;
 }

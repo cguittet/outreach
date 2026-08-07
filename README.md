@@ -4,10 +4,12 @@ A small, private relationship tracker for LinkedIn outreach. It combines a focus
 
 ## What is included
 
-- Today queue with overdue, due-now, and upcoming work
-- Prospect records, mutual contacts, notes, connection state, and activity timeline
-- Editable business-day follow-up sequence with message variables
-- Manual sent/reply controls that advance or cancel scheduled work
+- Today queue with linked pipeline metrics and a configurable weekday prospect goal
+- Editable prospect records, mutual contacts, notes, lifecycle stage, and activity timeline
+- Searchable, sortable, filterable prospect table with CSV export
+- Editable lifecycle stages with entry, reply, and no-reply message branches
+- Manual sent, reply, and stage-transition controls that advance or cancel scheduled work
+- KPI dashboard for additions, stage entries, and historical stage totals by day, week, or month
 - Replit Auth owner allowlist
 - Replit PostgreSQL migrations with an advisory lock
 - Revocable, hashed Chrome-extension pairing tokens
@@ -63,6 +65,8 @@ The CI workflow runs type checks, unit tests, and production builds for every pu
 
 The deployment startup runs all unapplied migrations before serving traffic. An advisory lock makes concurrent startup safe. Replit injects the correct development or production `DATABASE_URL` for each environment.
 
+When upgrading an existing deployment, publish the new code normally. Migration `0002_pipeline_upgrade.sql` creates the lifecycle stages, preserves the existing sequence under the Active stage, records a stage-history baseline, and maps paused/closed/no-response records to the new tracking state. Earlier lifecycle transitions cannot be reconstructed, so stage-history charts begin at the migration timestamp.
+
 ## Chrome extension
 
 1. Run `pnpm build:extension`.
@@ -84,7 +88,7 @@ For backup, select the production database in Replit's Database tool and use its
 
 ## Message variables
 
-Templates support `{{first_name}}`, `{{name}}`, `{{company}}`, and `{{job_title}}`. Business-day delays count Monday through Friday in the timezone selected under Workflow; public holidays are not excluded.
+Templates support `{{first_name}}`, `{{name}}`, `{{company}}`, and `{{job_title}}`. Each lifecycle stage can have an optional entry message, an optional reply message, and ordered no-reply follow-ups. Business-day delays count Monday through Friday in the timezone selected under Workflow; public holidays are not excluded.
 
 ## Security notes
 

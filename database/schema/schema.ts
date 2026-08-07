@@ -23,8 +23,23 @@ export const users = pgTable("users", {
 export const userSettings = pgTable("user_settings", {
   ownerId: uuid("owner_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
   timezone: text("timezone").notNull().default("America/New_York"),
+  dailyProspectGoal: integer("daily_prospect_goal").notNull().default(5),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const lifecycleStages = pgTable("lifecycle_stages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ownerId: uuid("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  stageKey: text("stage_key"),
+  stageOrder: integer("stage_order").notNull(),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("lifecycle_stages_owner_order_active_unique").on(table.ownerId, table.stageOrder).where(sql`${table.archivedAt} IS NULL`),
+  index("lifecycle_stages_owner_idx").on(table.ownerId),
+]);
 
 export const prospects = pgTable("prospects", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -36,12 +51,16 @@ export const prospects = pgTable("prospects", {
   companySize: text("company_size").notNull().default("Unknown"),
   connectionStatus: text("connection_status").notNull().default("not_connected"),
   workflowStatus: text("workflow_status").notNull().default("new"),
+  lifecycleStageId: uuid("lifecycle_stage_id").notNull().references(() => lifecycleStages.id, { onDelete: "restrict" }),
+  trackingStatus: text("tracking_status").notNull().default("open"),
   notes: text("notes").notNull().default(""),
+  lastInteractedAt: timestamp("last_interacted_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   uniqueIndex("prospects_owner_linkedin_unique").on(table.ownerId, table.linkedinUrl),
   index("prospects_owner_status_idx").on(table.ownerId, table.workflowStatus),
+  index("prospects_owner_stage_idx").on(table.ownerId, table.lifecycleStageId),
 ]);
 
 export const mutualContacts = pgTable("mutual_contacts", {
@@ -67,12 +86,27 @@ export const workflowSteps = pgTable("workflow_steps", {
   id: uuid("id").primaryKey().defaultRandom(),
   ownerId: uuid("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   workflowId: uuid("workflow_id").notNull().references(() => workflows.id, { onDelete: "cascade" }),
+  stageId: uuid("stage_id").notNull().references(() => lifecycleStages.id, { onDelete: "cascade" }),
+  trigger: text("trigger_type").notNull().default("no_reply"),
   stepOrder: integer("step_order").notNull(),
   kind: text("kind").notNull(),
   name: text("name").notNull(),
   delayBusinessDays: integer("delay_business_days").notNull().default(0),
   template: text("template").notNull(),
-}, (table) => [uniqueIndex("workflow_steps_order_unique").on(table.workflowId, table.stepOrder)]);
+}, (table) => [uniqueIndex("workflow_steps_branch_order_unique").on(table.stageId, table.trigger, table.stepOrder)]);
+
+export const prospectStageHistory = pgTable("prospect_stage_history", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ownerId: uuid("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  prospectId: uuid("prospect_id").notNull().references(() => prospects.id, { onDelete: "cascade" }),
+  fromStageId: uuid("from_stage_id").references(() => lifecycleStages.id, { onDelete: "restrict" }),
+  toStageId: uuid("to_stage_id").notNull().references(() => lifecycleStages.id, { onDelete: "restrict" }),
+  reason: text("reason").notNull().default("manual"),
+  occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index("prospect_stage_history_owner_time_idx").on(table.ownerId, table.occurredAt),
+  index("prospect_stage_history_prospect_time_idx").on(table.prospectId, table.occurredAt),
+]);
 
 export const scheduledActions = pgTable("scheduled_actions", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -116,6 +150,7 @@ export const prospectRelations = relations(prospects, ({ many }) => ({
   mutualContacts: many(mutualContacts),
   activities: many(activities),
   scheduledActions: many(scheduledActions),
+  stageHistory: many(prospectStageHistory),
 }));
 
 export const mutualContactRelations = relations(mutualContacts, ({ one }) => ({
