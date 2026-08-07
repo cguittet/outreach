@@ -1,0 +1,90 @@
+GET https://replit.com/public/manifest.json 403 (Forbidden)
+outreach:1 Manifest fetch from https://replit.com/public/manifest.json failed, code 403
+frame.js:21483 [Violation] Permissions policy violation: unload is not allowed in this document.
+(anonymous) @ frame.js:21483
+Promise.then
+manageFrames @ frame.js:21413
+render @ frame.js:21615
+await in render
+17908 @ frame.js:21718
+__webpack_require__ @ runtime.js:23
+__webpack_exec__ @ frame.js:21853
+(anonymous) @ frame.js:21854
+__webpack_require__.O @ runtime.js:60
+(anonymous) @ frame.js:21855
+webpackJsonpCallback @ runtime.js:322
+(anonymous) @ frame.js:2
+VM3340:6  GET https://www.googletagmanager.com/gtm.js?id=GTM-M3H3PQBG net::ERR_CONNECTION_CLOSED
+(anonymous) @ VM3340:6
+(anonymous) @ VM3340:7
+(anonymous) @ 24d5mlrovbwe0.js:62
+(anonymous) @ 24d5mlrovbwe0.js:62
+(anonymous) @ 24d5mlrovbwe0.js:62
+E @ 24d5mlrovbwe0.js:62
+ad @ 38875mijgz0mo.js:2
+ud @ 38875mijgz0mo.js:2
+i @ 38875mijgz0mo.js:2
+oD @ 38875mijgz0mo.js:2
+oR @ 38875mijgz0mo.js:2
+oS @ 38875mijgz0mo.js:2
+E @ 38875mijgz0mo.js:2
+L @ 38875mijgz0mo.js:2
+PendingScript
+(anonymous) @ 24d5mlrovbwe0.js:62
+(anonymous) @ 24d5mlrovbwe0.js:62
+(anonymous) @ 24d5mlrovbwe0.js:62
+E @ 24d5mlrovbwe0.js:62
+ad @ 38875mijgz0mo.js:2
+ud @ 38875mijgz0mo.js:2
+i @ 38875mijgz0mo.js:2
+oD @ 38875mijgz0mo.js:2
+oR @ 38875mijgz0mo.js:2
+oS @ 38875mijgz0mo.js:2
+E @ 38875mijgz0mo.js:2
+L @ 38875mijgz0mo.js:2
+postMessage
+o @ 38875mijgz0mo.js:2
+R @ 38875mijgz0mo.js:2
+t.unstable_scheduleCallback @ 38875mijgz0mo.js:2
+ow @ 38875mijgz0mo.js:2
+ok @ 38875mijgz0mo.js:2
+aQ @ 38875mijgz0mo.js:2
+n @ 24d5mlrovbwe0.js:62
+Promise.then
+(anonymous) @ 24d5mlrovbwe0.js:62
+uI @ 38875mijgz0mo.js:2
+oU @ 38875mijgz0mo.js:2
+(anonymous) @ 38875mijgz0mo.js:2
+E @ 38875mijgz0mo.js:2
+L @ 38875mijgz0mo.js:2
+postMessage
+o @ 38875mijgz0mo.js:2
+L @ 38875mijgz0mo.js:2
+postMessage
+o @ 38875mijgz0mo.js:2
+L @ 38875mijgz0mo.js:2
+postMessage
+o @ 38875mijgz0mo.js:2
+R @ 38875mijgz0mo.js:2
+t.unstable_scheduleCallback @ 38875mijgz0mo.js:2
+ow @ 38875mijgz0mo.js:2
+o3 @ 38875mijgz0mo.js:2
+t.hydrateRoot @ 38875mijgz0mo.js:2
+ec @ 2o0h00zytd9k1.js:2
+ef @ 2o0h00zytd9k1.js:2
+ed @ 2o0h00zytd9k1.js:2
+await in ed
+(anonymous) @ 2o0h00zytd9k1.js:2
+Promise.then
+module evaluation @ 2o0h00zytd9k1.js:2
+B @ turbopack-2_iq9jv60q5xt.js:2
+(anonymous) @ turbopack-2_iq9jv60q5xt.js:2
+registerChunk @ turbopack-2_iq9jv60q5xt.js:2
+await in registerChunk
+W @ turbopack-2_iq9jv60q5xt.js:2
+(anonymous) @ turbopack-2_iq9jv60q5xt.js:2
+(anonymous) @ turbopack-2_iq9jv60q5xt.js:2
+outreach:272  GET https://replit.com/public/manifest.json 403 (Forbidden)
+outreach:1 Manifest fetch from https://replit.com/public/manifest.json failed, code 403
+bbb99bb4-1225-47c7-a6c2-5c98dd9147cb-00-3j0spfdb3m1c6.kirk.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1s%3A:32 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1s%3A:169  GET https://bbb99bb4-1225-47c7-a6c2-5c98dd9147cb-00-3j0spfdb3m1c6.kirk.replit.dev/?__clerk_handshake=eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18zSGJpQW1URzIwVmpxR2lnbUNBUmNtd2JHWDIiLCJ0eXAiOiJKV1QifQ.eyJoYW5kc2hha2UiOlsiX19jbGllbnRfdWF0PTsgUGF0aD0vOyBNYXgtQWdlPTA7IFNlY3VyZTsgU2FtZVNpdGU9Tm9uZSIsIl9fY2xpZW50X3VhdD07IFBhdGg9LzsgRXhwaXJlcz1UaHUsIDAxIEphbiAxOTcwIDAwOjAwOjAwIEdNVDsgU2VjdXJlOyBTYW1lU2l0ZT1Ob25lOyBQYXJ0aXRpb25lZCIsIl9fY2xpZW50X3VhdD07IFBhdGg9LzsgRG9tYWluPWJiYjk5YmI0LTEyMjUtNDdjNy1hNmMyLTVjOThkZDkxNDdjYi0wMC0zajBzcGZkYjNtMWM2LmtpcmsucmVwbGl0LmRldjsgTWF4LUFnZT0wOyBTZWN1cmU7IFNhbWVTaXRlPU5vbmUiLCJfX2NsaWVudF91YXQ9MDsgUGF0aD0vOyBEb21haW49YmJiOTliYjQtMTIyNS00N2M3LWE2YzItNWM5OGRkOTE0N2NiLTAwLTNqMHNwZmRiM20xYzYua2lyay5yZXBsaXQuZGV2OyBNYXgtQWdlPTMxNTM2MDAwMDsgU2VjdXJlOyBTYW1lU2l0ZT1Ob25lOyBQYXJ0aXRpb25lZCIsIl9fc2Vzc2lvbj07IFBhdGg9LzsgTWF4LUFnZT0wOyBTZWN1cmU7IFNhbWVTaXRlPU5vbmUiLCJfX3Nlc3Npb249OyBQYXRoPS87IEV4cGlyZXM9VGh1LCAwMSBKYW4gMTk3MCAwMDowMDowMCBHTVQ7IFNlY3VyZTsgU2FtZVNpdGU9Tm9uZTsgUGFydGl0aW9uZWQiLCJfX2NsZXJrX2RiX2p3dD07IFBhdGg9LzsgTWF4LUFnZT0wOyBTZWN1cmU7IFNhbWVTaXRlPU5vbmUiLCJfX2NsZXJrX2RiX2p3dD1kdmJfM0hibHJlTnF3bVZtYTRDTVJqNkpPVTZ3dlNEOyBQYXRoPS87IEV4cGlyZXM9U2F0LCAwNyBBdWcgMjAyNyAyMzoyMDo0OCBHTVQ7IFNlY3VyZTsgU2FtZVNpdGU9Tm9uZTsgUGFydGl0aW9uZWQiXX0.SyjUQjCyRvo4csVaZ3ZE2W6m-7E4COt5RQxHO-TyvcYiHr1DDJnb_A6glm5HG4xXDfabZf-YuFuRF34sLDjITvBWEkn635Npz-aybjuncH0kBIBY5hAmdvZ1olW7Vmw7X3GWybv0fkDSdH1Yb2bIQd2OUq8whjDDRN_mMWTTqcGAfKrtynS2vKkc5bmnzErFLe1GYjFQzP0SSOrxH2YE1U9N17fk_KXbP55MQHoper6UwwmrA6HAuKHlQfoYRj0hgTv1m8YMAS0abBAz97NqgsNAqUaBDEgwGofkIYGQ9eO6KiZXMIo4witoE68iYo5nU56BszwNjYw1SMcrMz3wSw 426 (Upgrade Required)
