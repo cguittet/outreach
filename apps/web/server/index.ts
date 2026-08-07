@@ -8,6 +8,9 @@ import { registerRoutes } from "./routes";
 
 async function main() {
   const app = express();
+  // Trust Replit's reverse proxy so Express sees the correct protocol (https)
+  // and host — required for Clerk's handshake to validate correctly.
+  app.set("trust proxy", true);
   const extensionOrigin = process.env.ALLOWED_EXTENSION_ORIGIN;
   const isDev = process.env.NODE_ENV !== "production";
   app.use(cors({

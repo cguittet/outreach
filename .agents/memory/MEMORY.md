@@ -1,2 +1,3 @@
 - [Replit pnpm workspace setup quirks](replit-pnpm-workspace-setup.md) — remove packageManager field, fix cwd-relative paths for dev vs built contexts, add dev CORS origins for preview pane
 - [Clerk auth migration — email bridge pattern](clerk-email-bridge.md) — this app uses email as the JIT bridge (not userId); requireAuth looks up users by sessionClaims.email
+- [Clerk trust proxy — Replit reverse proxy fix](clerk-trust-proxy.md) — Clerk returns 426 on Replit without `app.set("trust proxy", true)`; must come before all middleware
