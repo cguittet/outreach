@@ -1,13 +1,11 @@
 import type { Express, NextFunction, Request, Response } from "express";
 import { clerkMiddleware, getAuth } from "@clerk/express";
-import { publishableKeyFromHost } from "@clerk/shared/keys";
 import { eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { userSettings, users } from "../../../database/schema/schema";
 import {
   CLERK_PROXY_PATH,
   clerkProxyMiddleware,
-  getClerkProxyHost,
 } from "./middlewares/clerkProxyMiddleware";
 
 type DbUser = typeof users.$inferSelect;
@@ -24,15 +22,8 @@ export async function setupAuth(app: Express): Promise<void> {
   // Mount Clerk proxy middleware BEFORE body parsers
   app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
-  // Mount Clerk middleware with publishableKeyFromHost for custom-domain support
-  app.use(
-    clerkMiddleware((req) => ({
-      publishableKey: publishableKeyFromHost(
-        getClerkProxyHost(req) ?? "",
-        process.env.CLERK_PUBLISHABLE_KEY,
-      ),
-    })),
-  );
+  // Simple middleware: reads CLERK_PUBLISHABLE_KEY + CLERK_SECRET_KEY from env
+  app.use(clerkMiddleware());
 
   // GET /api/auth/user — returns the local DB user row for the authenticated session
   app.get("/api/auth/user", requireAuth, (req, res) => {
